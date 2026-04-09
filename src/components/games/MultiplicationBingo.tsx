@@ -85,7 +85,7 @@ const k3Questions = [
 ];
 
 export function MultiplicationBingo({ onGameComplete, onExit }: MultiplicationBingoProps) {
-  const [grid] = useState<number[]>(() => generateGrid());
+  const [grid, setGrid] = useState<number[]>([]);
   const [currentQuestion, setCurrentQuestion] = useState<any>(null);
   const [selectedNumber, setSelectedNumber] = useState<number | null>(null);
   const [score, setScore] = useState(0);
@@ -96,14 +96,24 @@ export function MultiplicationBingo({ onGameComplete, onExit }: MultiplicationBi
   const [streak, setStreak] = useState(0);
   const [difficulty, setDifficulty] = useState<'P3' | 'K3'>('P3');
 
-  function generateGrid(): number[] {
-    const numbers: number[] = [];
+  function generateGrid(answer: number): number[] {
+    const numbers: number[] = [answer]; // Always include the correct answer
+    
+    // Generate 8 more random numbers (avoiding the answer)
     while (numbers.length < 9) {
-      const num = Math.floor(Math.random() * 81) + 1;
+      // Generate numbers that could plausibly be answers (1-100)
+      const num = Math.floor(Math.random() * 100) + 1;
       if (!numbers.includes(num)) {
         numbers.push(num);
       }
     }
+    
+    // Shuffle the grid
+    for (let i = numbers.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [numbers[i], numbers[j]] = [numbers[j], numbers[i]];
+    }
+    
     return numbers;
   }
 
@@ -116,7 +126,9 @@ export function MultiplicationBingo({ onGameComplete, onExit }: MultiplicationBi
 
   useEffect(() => {
     if (!gameEnded) {
-      setCurrentQuestion(generateQuestion());
+      const question = generateQuestion();
+      setCurrentQuestion(question);
+      setGrid(generateGrid(question.a)); // Generate grid WITH the answer
       setShowHint(false);
     }
   }, [gameEnded]);
@@ -150,8 +162,11 @@ export function MultiplicationBingo({ onGameComplete, onExit }: MultiplicationBi
     if (number === currentQuestion.a) {
       setScore((prev) => prev + 1);
       setStreak((prev) => prev + 1);
+      // Generate new question AND new grid with the new answer
       setTimeout(() => {
-        setCurrentQuestion(generateQuestion());
+        const newQuestion = generateQuestion();
+        setCurrentQuestion(newQuestion);
+        setGrid(generateGrid(newQuestion.a)); // New grid with new answer
         setSelectedNumber(null);
         setShowHint(false);
       }, 500);
