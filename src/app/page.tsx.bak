@@ -1,6 +1,8 @@
 'use client';
+
 import { useState } from 'react';
-import { BookOpen, Calculator, Languages, Mic } from 'lucide-react';
+import { BookOpen, Calculator, Languages, Mic, ArrowLeft } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { GameCard } from '@/components/GameCard';
 import { CoinDisplay } from '@/components/CoinDisplay';
 import { LevelBadge } from '@/components/LevelBadge';
@@ -14,8 +16,8 @@ export default function Home() {
   const [view, setView] = useState<View>('dashboard');
   const [currentGame, setCurrentGame] = useState<Game>(null);
   const [coins, setCoins] = useState(150);
-  const [level] = useState(3);
-  const [streak] = useState(5);
+  const [level, setLevel] = useState(3);
+  const [streak, setStreak] = useState(5);
 
   const handleGameComplete = (score: number, correct: number, total: number, earnedCoins: number) => {
     setCoins((prev) => prev + earnedCoins);
@@ -37,7 +39,10 @@ export default function Home() {
     return (
       <main className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 p-4 md:p-8">
         <div className="max-w-4xl mx-auto">
-          <MultiplicationBingo onGameComplete={handleGameComplete} onExit={handleExitGame} />
+          <MultiplicationBingo 
+            onGameComplete={handleGameComplete}
+            onExit={handleExitGame}
+          />
         </div>
       </main>
     );
@@ -58,6 +63,7 @@ export default function Home() {
               <p className="text-sm text-muted-foreground">Your personalized learning companion</p>
             </div>
           </div>
+          
           <div className="flex items-center gap-4">
             <CoinDisplay coins={coins} size="md" />
             <LevelBadge level={level} size="md" />
@@ -78,6 +84,7 @@ export default function Home() {
             </div>
             <StreakProgress currentStreak={streak} targetStreak={7} />
           </div>
+
           <div className="bg-white rounded-xl shadow-sm border p-6">
             <div className="flex items-center gap-3 mb-3">
               <div className="p-2 bg-blue-100 rounded-lg">
@@ -91,6 +98,7 @@ export default function Home() {
             <div className="text-3xl font-bold text-blue-600">12%</div>
             <p className="text-xs text-muted-foreground mt-1">Of curriculum complete</p>
           </div>
+
           <div className="bg-white rounded-xl shadow-sm border p-6">
             <div className="flex items-center gap-3 mb-3">
               <div className="p-2 bg-yellow-100 rounded-lg">
@@ -110,6 +118,7 @@ export default function Home() {
         <section>
           <h2 className="text-2xl font-bold text-gray-900 mb-4">🎮 Choose Your Game</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Multiplication Bingo */}
             <GameCard
               title="Multiplication Bingo"
               subject="math"
@@ -120,6 +129,8 @@ export default function Home() {
               accuracy={0}
               onPlay={() => startGame('multiplication-bingo')}
             />
+
+            {/* Phonics Sprint - Locked */}
             <GameCard
               title="Phonics Sprint"
               subject="english"
@@ -130,6 +141,8 @@ export default function Home() {
               requiredLevel={5}
               currentLevel={level}
             />
+
+            {/* Pinyin Balloon Pop - Locked */}
             <GameCard
               title="拼音 Balloon Pop"
               subject="chinese"
