@@ -95,6 +95,7 @@ export function MultiplicationBingo({ onGameComplete, onExit }: MultiplicationBi
   const [showHint, setShowHint] = useState(false);
   const [streak, setStreak] = useState(0);
   const [difficulty, setDifficulty] = useState<'P3' | 'K3'>('P3');
+  const [feedback, setFeedback] = useState<'correct' | 'wrong' | null>(null);
 
   function generateGrid(answer: number): number[] {
     const numbers: number[] = [answer]; // Always include the correct answer
@@ -157,24 +158,37 @@ export function MultiplicationBingo({ onGameComplete, onExit }: MultiplicationBi
   const handleNumberClick = (number: number) => {
     if (!currentQuestion || gameEnded) return;
     
+    // Just select the number, don't submit yet
     setSelectedNumber(number);
+    setFeedback(null);
+  };
+
+  const handleSubmitAnswer = () => {
+    if (!currentQuestion || selectedNumber === null || gameEnded) return;
     
-    if (number === currentQuestion.a) {
+    if (selectedNumber === currentQuestion.a) {
+      // Correct!
       setScore((prev) => prev + 1);
       setStreak((prev) => prev + 1);
-      // Generate new question AND new grid with the new answer
+      setFeedback('correct');
+      
+      // Generate new question after delay
       setTimeout(() => {
         const newQuestion = generateQuestion();
         setCurrentQuestion(newQuestion);
-        setGrid(generateGrid(newQuestion.a)); // New grid with new answer
+        setGrid(generateGrid(newQuestion.a));
         setSelectedNumber(null);
         setShowHint(false);
-      }, 500);
+        setFeedback(null);
+      }, 1000);
     } else {
+      // Wrong!
       setStreak(0);
+      setFeedback('wrong');
       setTimeout(() => {
+        setFeedback(null);
         setSelectedNumber(null);
-      }, 500);
+      }, 1000);
     }
     
     setTotalQuestions((prev) => prev + 1);
@@ -292,13 +306,47 @@ export function MultiplicationBingo({ onGameComplete, onExit }: MultiplicationBi
             <Button
               key={index}
               variant={selectedNumber === number ? 'default' : 'outline'}
-              className="h-20 text-2xl font-bold transition-all"
+              className={`h-20 text-2xl font-bold transition-all transform hover:scale-105 ${
+                selectedNumber === number 
+                  ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-lg scale-105' 
+                  : 'hover:bg-blue-50'
+              }`}
               onClick={() => handleNumberClick(number)}
               disabled={gameEnded}
             >
               {number}
             </Button>
           ))}
+        </div>
+
+        {/* Confirm Button */}
+        <div className="flex flex-col items-center gap-3">
+          {selectedNumber !== null && (
+            <div className="text-center space-y-2 animate-in fade-in">
+              <p className="text-sm text-muted-foreground">
+                You selected: <span className="font-bold text-lg">{selectedNumber}</span>
+              </p>
+              <Button
+                onClick={handleSubmitAnswer}
+                size="lg"
+                className="bg-green-600 hover:bg-green-700 text-white px-8 py-6 text-lg font-bold shadow-lg"
+              >
+                ✓ Submit Answer
+              </Button>
+            </div>
+          )}
+          
+          {feedback === 'correct' && (
+            <div className="text-center text-green-600 font-bold text-xl animate-in zoom-in">
+              🎉 Correct! +10 coins
+            </div>
+          )}
+          
+          {feedback === 'wrong' && (
+            <div className="text-center text-red-600 font-bold text-xl animate-in shake">
+              ❌ Try again!
+            </div>
+          )}
         </div>
 
         <div className="flex justify-between items-center text-sm text-muted-foreground">
